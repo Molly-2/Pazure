@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinterest Image Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+        #images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        img {
+            max-width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
+        a {
+            color: blue;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pinterest Image Fetcher</h1>
+    <input type="text" id="query" placeholder="Enter search term" />
+    <input type="number" id="count" placeholder="Number of images" min="1" />
+    <button onclick="fetchImages()">Fetch Images</button>
+    <div id="images"></div>
+
+    <script>
+        async function fetchImages() {
+            const query = document.getElementById('query').value.trim();
+            const count = document.getElementById('count').value.trim();
+
+            if (!query) {
+                alert("Please enter a search term.");
+                return;
+            }
+
+            const url = `/pinterest?query=${encodeURIComponent(query)} ${count}`;
+
+            try {
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch images');
+                }
+
+                const data = await response.json();
+
+                // Clear previous images
+                const imagesContainer = document.getElementById('images');
+                imagesContainer.innerHTML = '';
+
+                if (data && data.length > 0) {
+                    data.forEach(imgUrl => {
+                        // Create a container for each image and link
+                        const container = document.createElement('div');
+                        container.className = 'image-container';
+
+                        // Create the image element
+                        const imgElement = document.createElement('img');
+                        imgElement.src = imgUrl;
+                        container.appendChild(imgElement);
+
+                        // Create the URL link
+                        const linkElement = document.createElement('a');
+                        linkElement.href = imgUrl;
+                        linkElement.textContent = imgUrl;
+                        linkElement.target = '_blank'; // Open link in a new tab
+                        container.appendChild(linkElement);
+
+                        // Append the container to the images section
+                        imagesContainer.appendChild(container);
+                    });
+                } else {
+                    imagesContainer.innerText = "No images found";
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error fetching images');
+            }
+        }
+    </script>
+</body>
+</html>
